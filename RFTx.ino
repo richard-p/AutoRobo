@@ -12,16 +12,24 @@
 RF24 radio = RF24(9,10);
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
 
-const uint64_t TxAddr = 0xB00B1;
+const uint64_t Addr[2] = {0xB00B1, 0xB00B2};
 
-struct message{
+struct incomingMessage{
   int num;
   char letter;
-  bool TF;
+  bool DIR;
   float decimal;
 };
 
-message Data;
+struct outgoingMessage{
+  int num;
+  char letter;
+  bool DIR;
+  float decimal;
+};
+
+outgoingMessage Data;
+incomingMessage Update;
 
 void setup() {
   radio.begin();
@@ -30,14 +38,15 @@ void setup() {
   accel.setRange(ADXL345_RANGE_16_G);
   
   
-  radio.openWritingPipe(TxAddr);
+  radio.openWritingPipe(Addr[0]);
+  radio.openReadingPipe(1, Addr[1]);
 
+  radio.stopListening();
 
   Data.num = 2;
   Data.letter = 'A';
-  Data.TF = false;
-  //Data.decimal = 3.14159;
-  
+  Data.DIR = true;
+    
   if(DEBUG)
   {
     Serial.begin(9600);
@@ -47,15 +56,39 @@ void setup() {
 }
 
 void loop() {
-  sensors_event_t event;
-  accel.getEvent(&event);
 
-  Data.decimal = event.acceleration.x;
+  if (Data.DIR)
+  {
+    sensors_event_t event;
+    accel.getEvent(&event);
+
+    Data.decimal = event.acceleration.x;
+
+    Data.DIR = false;
+    
+    radio.write(&Data, sizeof(Data));
+
+  }
+
+  else
+  {
+    radio.startListening();
+    if (radio.available())
+    {
+      radio.read(&Update, sizeof(Update));
+    }
+
+    Serial.print(Update.num);
+    Serial.print(" ");
+    Serial.print(Update.letter);
+    Serial.print(" ");
+    Serial.print(Update.DIR);
+    Serial.print(" ");
+    Serial.println(Update.decimal);
+
+    Data.DIR = true;
+    radio.stopListening();
+
+  }
   
-  radio.stopListening();
-  bool ok = radio.write(&Data, sizeof(Data));
-
-  if (ok){digitalWrite(5, HIGH);}
-  else{digitalWrite(5, LOW);}
-
 }
