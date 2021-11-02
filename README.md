@@ -7,7 +7,7 @@ First Go (Finished: 1, x, x)
       * SPI OLED display for remote visuals
       * nRF24L01 SPI radio for transmission
       * joystick module for direction
-      * seeeduino xiao for control
+      * seeeduino xiao for control (for initial tests an Arduino Mega was used)
 
     Board design is also uploaded.
     
