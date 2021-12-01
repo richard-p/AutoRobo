@@ -1,7 +1,7 @@
 # AutoRobo
 A brief foray into state space control systems.
 
-First Go (Finished: 1, x, x)
+First Go (Finished: 1, 2, x)
 1)  Im working on normal control first to get my feet wet.
     Currently Im designing a remote to control my robot.
       * SPI OLED display for remote visuals
